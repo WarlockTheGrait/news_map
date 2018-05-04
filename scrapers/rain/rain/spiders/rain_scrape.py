@@ -6,34 +6,45 @@ import time
 
 
 class Rain(scrapy.Spider):
-	name = "rain_scraper"
+    name = "rain_scraper"
 
-	start_urls = []
-	N = 4
+    start_urls = []
 
-	for i in range(1, N + 1):
-		start_urls.append("https://tvrain.ru/archive/?tab=News&page="+str(i)+"")
-	
-	def parse(self, response):
-		for href in response.xpath("//div[contains(@class, 'chrono_list__item__info')]/a[contains(@class, 'chrono_list__item__info__name chrono_list__item__info__name--nocursor')]//@href"):
-			# add the scheme, eg http://
-			url  = "https://tvrain.ru" + href.extract()
-			time.sleep(3)
-			yield scrapy.Request(url, callback=self.parse_dir_contents)	
-					
-	def parse_dir_contents(self, response):
-		item = RainItem()
+    #паттерн для страниц архива
+    #если search_year, search_month, search_day =0, то поиск статей по всем возможным годам и тд
+    url_pattern = "https://tvrain.ru/archive/?search_year=2018&search_month=5&search_day=0&query=&type=&tab=News&page="
 
-		item['Title'] = " ".join(response.xpath("//div[contains(@class, 'document-head__title')]/descendant::text()").extract()).strip()
 
-		item['Date']= " ".join(response.xpath("//span[contains(@class, 'document-head__date')]/descendant::text()").extract()).strip()
+    start_urls.append(url_pattern + str(1))
 
-		item['articleLead'] = " ".join(response.xpath("//div[contains(@class, 'document-lead')]/descendant::text()").extract()).strip()
+    #получаем количество доступных страниц
+    def parse(self, response):
+        N = [int(s.strip()) for s in response.xpath("//a[contains(@class, 'pagination__item pagination__item--link')]/descendant::text()").extract()][-1]
+        for i in range(1, N+1):
+            url = self.url_pattern + str(i)
+            yield scrapy.Request(url, callback = self.parse_pages)
 
-		item['articleText']  = " ".join(response.xpath("//div[contains(@class, 'article-full__text')]").xpath(".//p/descendant::text()").extract()).strip()
+    #парсим страницы
+    def parse_pages(self, response):
+        for href in response.xpath("//div[contains(@class, 'chrono_list__item__info')]/a[contains(@class, 'chrono_list__item__info__name chrono_list__item__info__name--nocursor')]//@href"):
+            # add the scheme, eg http://
+            url  = response.urljoin(href.extract())
+            yield scrapy.Request(url, callback=self.parse_articles)
 
-		# Url (The link to the page)
-		item['url'] = response.xpath("//meta[@property='og:url']/@content").extract()
+    #парсим статьи
+    def parse_articles(self, response):
+        item = RainItem()
 
-		yield item
+        item['Title'] = " ".join(response.xpath("//div[contains(@class, 'document-head__title')]/descendant::text()").extract()).strip()
+
+        item['Date']= " ".join(response.xpath("//span[contains(@class, 'document-head__date')]/descendant::text()").extract()).strip()
+
+        item['Lead'] = " ".join(response.xpath("//div[contains(@class, 'document-lead')]/descendant::text()").extract()).strip()
+
+        item['Text']  = " ".join(response.xpath("//div[contains(@class, 'article-full__text')]").xpath(".//p/descendant::text()").extract()).strip()
+
+        # Url (The link to the page)
+        item['url'] = response.xpath("//meta[@property='og:url']/@content").extract()[0]
+
+        yield item
 
