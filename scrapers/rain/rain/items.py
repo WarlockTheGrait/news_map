@@ -10,6 +10,6 @@ import scrapy
 class RainItem(scrapy.Item):
 	Title = scrapy.Field()
 	Date = scrapy.Field()
-	articleLead = scrapy.Field()
-	articleText = scrapy.Field()
+	Lead = scrapy.Field() # превью статьи, в базе объединяется с основным текстом
+	Text = scrapy.Field()
 	url = scrapy.Field()
