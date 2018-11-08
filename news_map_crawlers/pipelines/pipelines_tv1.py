@@ -21,14 +21,13 @@ db = scoped_session(sessionmaker(autocommit=False,
                                  bind=engine))
 
 Base = declarative_base()
-months = {'января': 'january', 'февраля': 'february', 'марта': 'march',
-          'апреля': 'april', 'мая': 'may', 'июня': 'june',
-          'июля': 'july', 'августа': 'august', 'сентября': 'september',
-          'октября': 'october', 'ноября': 'november', 'декабря': 'december'}
+months = {'января': 'january', 'февраля': 'february', 'марта': 'march', 'апреля': 'april', 'мая': 'may', 'июня': 'june',
+          'июля': 'july', 'августа': 'august', 'сентября': 'september', 'октября': 'october', 'ноября': 'november',
+          'декабря': 'december'}
 
 
 class Data(Base):
-    __tablename__ = 'Meduza_table'
+    __tablename__ = 'tv1_table'
 
     id = Column(Integer, primary_key=True)
     Title = Column(String)
@@ -58,7 +57,7 @@ class Data(Base):
 
 
 # удалить в случае дозаписи
-if engine.has_table('Meduza_table'):
+if engine.has_table('tv1_table'):
     Data.__table__.drop(engine)
 
 Base.metadata.create_all(engine)
@@ -67,7 +66,7 @@ Base.metadata.create_all(engine)
 class AddTablePipeline(object):
 
     def process_item(self, item, spider):
-        if item['Title'] and item['Date'] and item['Text']:
+        if (item['Title'] and item['Date'] and item['Text']):
             # create a new SQL Alchemy object and add to the db session
             record = Data(Title=item['Title'],
                           Text=item['Text'],
