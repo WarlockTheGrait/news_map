@@ -27,8 +27,8 @@ class Meduza(Spider):
 
     def parse(self, response):
         item = ArticleItem()
-        item['Title'] = response.xpath("//span[@class = 'NewsMaterialHeader-first']//text()").extract_first()
-        item['Date'] = response.xpath("//div[@class = 'MaterialMeta MaterialMeta--time']//text()").extract_first()
-        item['Text'] = " ".join(response.xpath("//div[@class = 'Body']").xpath(".//p//text()").extract())
+        item['Title'] = response.xpath("//h1[@class = 'SimpleTitle-root']//text()").extract_first()
+        item['Date'] = response.xpath("//time[@class = 'Timestamp-root']//text()").extract_first()
+        item['Text'] = " ".join(response.xpath("//div[@class = 'GeneralMaterial-article']").xpath(".//p//text()").extract())
         item['url'] = response.xpath("//meta[@property='og:url']/@content").extract_first()
         yield item
