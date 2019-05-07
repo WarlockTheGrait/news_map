@@ -59,7 +59,7 @@ class Model(object):
         hingle_over_span = tf.map_fn(loss_fn, neg_embs)
         mean_hingle = tf.reduce_mean(hingle_over_span)
 
-        penalty = config.eps * tf.reduce_sum(
+        penalty = config.lambda_coef * tf.reduce_sum(
             (tf.matmul(self.norm_R, self.norm_R, transpose_b=True) - tf.eye(num_descs)) ** 2)
 
         self.pure_error = tf.reduce_mean(addend)
