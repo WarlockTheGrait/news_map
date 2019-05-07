@@ -138,7 +138,7 @@ def generate_test_datasets(config):
     for news in news_names:
         _, _, files = next(os.walk(f'{filepath}/{news}/real'), (None, None, []))
 
-        real_filenames = [f'{filepath}/{news}/real/{file}' for file in files]
+        real_filenames.extend([f'{filepath}/{news}/real/{file}' for file in files])
         keys.extend([f"{news}--{file.split('.')[0]}" for file in files])
 
     num_traj = len(real_filenames)

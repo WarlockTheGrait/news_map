@@ -17,13 +17,13 @@ from utils.enum_classes import WordModel
 
 
 def get_We(config):
-    with open('data\\words_set.pkl', 'rb') as f:
+    with open('utils\\words_set.pkl', 'rb') as f:
         words_set = pickle.load(f)
     words_list = list(words_set)
     revmap = {i: word for i, word in enumerate(words_list)}
     del words_set
     if config.words_model is WordModel.FASTTEXT:
-        model = fastText.load_model(r'C:\Users\Peksha\fastText\ft_native_300_ru_wiki_lenta_lemmatize.bin')
+        model = fastText.load_model(r'C:\Users\Peksha\fast_text\ft_native_300_ru_wiki_lenta_lemmatize.bin')
         gen = (model.get_word_vector(word) for word in words_list)
         We = np.array([word / np.linalg.norm(word) for word in gen])
         print(We.shape)
@@ -61,7 +61,6 @@ def write_data(model_name, model_path, config, print_iter=50):
     descriptor_log = f'descriptors/{model_name}-desc.log'
     trajectory_log = f'trajectories/{model_name}-traj.log'
 
-    R_fix = np.load('R-fix.npy')
     with tf.variable_scope(model_name):
         batch, keys, num_traj = generate_test_datasets(config)
         m = Model(config, batch,  is_training=False)
@@ -107,8 +106,8 @@ def write_data(model_name, model_path, config, print_iter=50):
 
 if __name__ == '__main__':
     model_path = 'saved_models'
-    model_save_name = ''
-    with open(f'{model_path}/config/{model_save_name}.pkl', 'rb') as f:
+    model_save_name = 'LSTM--new_fastText--newloss'
+    with open(f'{model_path}/configs/{model_save_name}.pkl', 'rb') as f:
         config = pickle.load(f)
 
     config.is_training = False
