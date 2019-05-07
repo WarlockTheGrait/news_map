@@ -9,7 +9,7 @@ def run():
     settings = get_project_settings()
     settings.set("FEED_EXPORT_ENCODING", 'utf-8')
     settings.set("CONCURRENT_REQUESTS", 32)
-    settings.set("ITEM_PIPELINES", {'pipelines.pipelines_tv1.AddTablePipeline': 100})
+    settings.set("ITEM_PIPELINES", {'utils.pipelines.AddTablePipeline': 100})
 
     configure_logging()
     process = CrawlerProcess(settings)
