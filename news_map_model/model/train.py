@@ -25,7 +25,7 @@ class Config:
 
     epoch_size = 150
     lr = 0.001
-    eps = 1e-5
+    lambda_coef = 1e-5  # lambda coef for loss
 
     new_loss = True
     train_alpha = False
@@ -35,7 +35,7 @@ class Config:
 
     dataset_random_seed = 9
 
-    scaled_lr = True
+    scaled_lr = True  # experiments with varied learning rate (from Attention ia all you need)
     lr_coef = 0.05
     warmup_steps = 750.
 
@@ -105,7 +105,6 @@ def train(config, print_iter=5):
                         print("Epoch {}, Step {}, cost: {:.3f}, Seconds per step: {:.2f}".format(epoch,
                                                                                                  step + 1, cost,
                                                                                                  seconds))
-
                 error /= num_steps
                 difference /= num_steps
                 pure_error /= num_steps
