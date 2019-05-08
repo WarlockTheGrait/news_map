@@ -23,8 +23,8 @@ class Config:
     alpha = 1
     beta = 0.5
 
-    epoch_size = 150
-    lr = 0.001
+    epoch_size = 200
+    lr = 0.001          # learning rate
     lambda_coef = 1e-5  # lambda coef for loss
 
     new_loss = True
@@ -35,7 +35,8 @@ class Config:
 
     dataset_random_seed = 9
 
-    scaled_lr = True  # experiments with varied learning rate (from Attention ia all you need)
+    # experiments with varied learning rate (from Attention ia all you need)
+    scaled_lr = True  # if False, lr is used
     lr_coef = 0.05
     warmup_steps = 750.
 
@@ -85,35 +86,23 @@ def train(config, print_iter=5):
                 if num_traj % config.batch_size == 0 else num_traj // config.batch_size + 1
             for epoch in range(config.epoch_size):
                 print("Epoch {} started".format(epoch))
-                error = 0.
-                difference = 0.
-                pure_error = 0.
-                for step in range(num_steps):
 
-                    cost, _, merged, diff, pure = sess.run([m.cost, m.train_op, m.merged,
-                                                            m.difference, m.pure_error],
-                                                           {m.step_num: step + epoch * num_steps + 1})
+                for step in range(num_steps):
+                    if config.scaled_lr:
+                        cost, _, merged = sess.run([m.cost, m.train_op, m.merged],
+                                                   {m.step_num: step + epoch * num_steps + 1})
+                    else:
+                        cost, _, merged = sess.run([m.cost, m.train_op, m.merged])
 
                     glob_step += 1
                     train_writer.add_summary(merged, glob_step)
-                    error += cost
-                    difference += diff
-                    pure_error += pure
+
                     if step % print_iter == print_iter - 1:
                         seconds = (float((dt.datetime.now() - curr_time).seconds) / print_iter)
                         curr_time = dt.datetime.now()
                         print("Epoch {}, Step {}, cost: {:.3f}, Seconds per step: {:.2f}".format(epoch,
                                                                                                  step + 1, cost,
                                                                                                  seconds))
-                error /= num_steps
-                difference /= num_steps
-                pure_error /= num_steps
-
-                print(f'Epoch {epoch}, Error {error:.4f} Difference {difference:.3f} Pure error {pure_error:.3f}')
-
-                # save a model checkpoint
-                # if epoch % 100 == 0 and epoch != config.epoch_size - 1 and epoch != 0:
-                    # saver.save(sess, save_path + '\\' + model_save_name)
 
             # do a final save
             print('Final results')
@@ -134,7 +123,7 @@ def train(config, print_iter=5):
             result = f'{model_name}, Error {error:.4f} Difference {difference:.3f} Pure error {pure_error:.3f}'
             print(result)
 
-            with open(f'{config.save_path}/config/{model_name}.pkl', 'wb') as f:
+            with open(f'{config.save_path}/configs/{model_name}.pkl', 'wb') as f:
                 pickle.dump(config, f, pickle.HIGHEST_PROTOCOL)
                 
             with open(f'{config.save_path}/info/{model_name}.log', 'w', encoding='utf-8') as log:

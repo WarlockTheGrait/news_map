@@ -96,6 +96,8 @@ def generate_train_datasets(config):
         tuple_filenames.extend([(real_filenames[i], batch_filenames[i]) for i in range(len(files))])
 
     num_traj = len(tuple_filenames)
+    if num_traj == 0:
+        raise Exception('0 traj in ' + f'{filepath}\\{news}\\batch{config.word_dropout}')
 
     random.shuffle(tuple_filenames)
     real_filenames = [tuple_filenames[i][0] for i in range(num_traj)]

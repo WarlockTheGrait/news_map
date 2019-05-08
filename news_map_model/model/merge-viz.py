@@ -135,8 +135,8 @@ def viz_csv(rmn_traj1, rmn_descs1, rmn_traj2, rmn_descs2, color_list,
 
 
 if __name__ == '__main__':
-    model_name1 = ''
-    model_name2 = ''
+    model_name1 = 'LSTM--new_fastText--newloss'
+    model_name2 = 'LSTM--new_fastText--newloss'
 
     save_path = 'figs/merge'
 

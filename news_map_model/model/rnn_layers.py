@@ -75,6 +75,11 @@ class AlphaCell(tf.contrib.rnn.LayerRNNCell):
             raise ValueError("Expected inputs.shape[-1] to be known, saw shape: %s"
                              % inputs_shape)
 
+        self._w = self.add_variable(
+            'alpha_weigths',
+            shape=[self.num_descs, self.num_descs],
+            initializer=tf.initializers.identity())
+
         if self._train_alpha:
             self._alpha = tf.get_variable('alpha', shape=[], dtype=tf.float32,
                                           initializer=tf.initializers.constant(0))
@@ -83,14 +88,10 @@ class AlphaCell(tf.contrib.rnn.LayerRNNCell):
         self.built = True
 
     def call(self, h, state):
+        super_h = tf.matmul(h, self._w)
         coef = tf.reduce_sum(state, axis=1)
         another_coef = tf.expand_dims(tf.ones(tf.shape(coef)) - coef, 1)
-        soft = tf.nn.softmax(2 * h)
-        # h_trans = h + tf.ones(tf.shape(h))
-        # h_trans = tf.nn.relu(h_trans)
-        # redsum = tf.reduce_sum(h_trans)
-        # soft = tf.cond(redsum > 10e-7, h_trans / redsum, tf.nn.softmax(h_trans))
-        # soft = h_trans / redsum
+        soft = tf.nn.softmax(super_h)
 
         if self._train_alpha:
             h_new = self.alpha * soft + (tf.ones([]) - self.alpha) * (state + tf.multiply(another_coef, soft))
